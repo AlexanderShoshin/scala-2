@@ -1,0 +1,3 @@
+object FlightsQueries extends App {
+
+}
