@@ -12,6 +12,7 @@ object FlightsQueries extends App {
   val carriers = sql.csvFile("/training/hive/carriers/carriers.csv", cacheTable = true)
   val flights = sql.csvFile("/training/hive/flights/2007.csv.bz2", cacheTable = true)
 
+  // query1
   val flightsPerCarrier = flights
       .groupBy("UniqueCarrier")
       .count()
@@ -21,6 +22,7 @@ object FlightsQueries extends App {
       .select("carrier", "count")
       .orderBy(column("count").desc)
 
+  // query 2
   val newYorkAirports = airports
       .filter(lower(column("city")) === "new york")
       .select("iata")
@@ -32,5 +34,19 @@ object FlightsQueries extends App {
       .filter(column("Origin").isin(newYorkAirports:_*)
           .or(column("Dest").isin(newYorkAirports:_*)))
 
-  
+  // query 3
+  val summerFlights = flights.filter(column("Month").between(6, 8))
+  summerFlights.cache()
+  val mostBusyAirports = summerFlights
+      .select("Origin")
+      .unionAll(summerFlights.select("Dest"))
+      .withColumnRenamed("Origin", "iata")
+      .groupBy("iata")
+      .count()
+      .orderBy(column("count").desc)
+      .limit(5)
+      .join(airports, "iata")
+      .select("airport", "count")
+      .orderBy(column("count").desc)
+  summerFlights.unpersist()
 }
