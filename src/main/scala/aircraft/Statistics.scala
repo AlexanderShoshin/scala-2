@@ -1,7 +1,9 @@
+package aircraft
+
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
-object AirStat {
+object Statistics {
   def countCarriersFlights(flights: DataFrame, carriers: DataFrame) = {
     flights
         .groupBy("UniqueCarrier")

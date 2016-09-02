@@ -1,11 +1,12 @@
+package aircraft
+
 import com.holdenkarau.spark.testing.SharedSparkContext
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 import org.scalatest.FlatSpec
 
-case class Flight(Month: Int, UniqueCarrier: String, Origin: String, Dest: String)
-case class Carrier(Code: String, Description: String)
-case class Airport(iata: String, airport: String, city: String)
-
+/**
+  * Created by Alexander_Shoshin on 9/2/2016.
+  */
 class FlightsQueriesTest extends FlatSpec with SharedSparkContext {
   var flights: DataFrame = _
   var carriers: DataFrame = _
@@ -52,25 +53,25 @@ class FlightsQueriesTest extends FlatSpec with SharedSparkContext {
   }
 
   it should "count carriers flights" in {
-    val carrierFlights = AirStat.countCarriersFlights(flights, carriers).collect()
+    val carrierFlights = Statistics.countCarriersFlights(flights, carriers).collect()
     val expected = List(Row("Carrier 1", 2), Row("Carrier 2", 1))
     assertResult(expected)(carrierFlights)
   }
 
   it should "count city flights in chosen month" in {
-    val carrierFlights = AirStat.countFlightsByCity(flights, airports, "Moscow", month = 2).collect()
+    val carrierFlights = Statistics.countFlightsByCity(flights, airports, "Moscow", month = 2).collect()
     val expected = List(Row(2))
     assertResult(expected)(carrierFlights)
   }
 
   it should "find most busy airport" in {
-    val mostBusyAirport = AirStat.findMostBusyAirports(flights, airports, count = 1, Array(1, 2)).collect()
+    val mostBusyAirport = Statistics.findMostBusyAirports(flights, airports, count = 1, Array(1, 2)).collect()
     val expected = List(Row("Sheremetevo", 3))
     assertResult(expected)(mostBusyAirport)
   }
 
   it should "find most busy carrier" in {
-    val mostBusyCarrier = AirStat.findMostBusyCarriers(flights, carriers, count = 1).collect()
+    val mostBusyCarrier = Statistics.findMostBusyCarriers(flights, carriers, count = 1).collect()
     val expected = List(Row("Carrier 1", 2))
     assertResult(expected)(mostBusyCarrier)
   }
