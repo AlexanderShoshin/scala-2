@@ -1,6 +1,6 @@
 package aircraft
 
-class cliParser extends scopt.OptionParser[DataLocation]("scala-2-assembly-1.0.jar") {
+class cliParser extends scopt.OptionParser[DataLocation]("scala-2") {
   opt[String]('f', "flights")
       .required()
       .valueName("<file>")
