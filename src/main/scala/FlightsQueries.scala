@@ -1,6 +1,5 @@
 import CustomImplicits._
 import org.apache.spark.sql.SQLContext
-import org.apache.spark.sql.functions._
 import org.apache.spark.{SparkConf, SparkContext}
 
 object FlightsQueries extends App {
@@ -8,56 +7,23 @@ object FlightsQueries extends App {
   val sc = new SparkContext(conf)
   val sql = new SQLContext(sc)
 
-  val airports = sql.csvFile("/training/hive/airports/airports.csv", cacheTable = true)
-  val carriers = sql.csvFile("/training/hive/carriers/carriers.csv", cacheTable = true)
-  val flights = sql.csvFile("/training/hive/flights/2007.csv.bz2", cacheTable = true)
+  val airports = sql.csvFile("/training/hive/airports/airports.csv", cacheTable = false)
+  val carriers = sql.csvFile("/training/hive/carriers/carriers.csv", cacheTable = false)
+  val flights = sql.csvFile("/training/hive/flights/2007.csv.bz2", cacheTable = false)
 
-  // query1
-  val carriersFlights = flights
-      .groupBy("UniqueCarrier")
-      .count()
-      .withColumnRenamed("UniqueCarrier", "Code")
-      .join(carriers, "Code")
-      .withColumnRenamed("Description", "carrier")
-      .select("carrier", "count")
-      .orderBy(column("count").desc)
+  // Count total number of flights per carrier in 2007
+  val carriersFlights = AirStat.countCarriersFlights(flights, carriers)
+  carriersFlights.show
 
-  // query 2
-  val newYorkAirports = airports
-      .filter(lower(column("city")) === "new york")
-      .select("iata")
-      .collect()
-      .map(_.getString(0))
+  // The total number of flights served in Jun 2007 by NYC
+  val newYorkFlightsCount = AirStat.countFlightsByCity(flights, airports, "New York", month = 6)
+  newYorkFlightsCount.show
 
-  val flightsServedByNY = flights
-      .filter(column("Month") === 6)
-      .filter(column("Origin").isin(newYorkAirports:_*)
-          .or(column("Dest").isin(newYorkAirports:_*)))
+  // Find five most busy airports in US during Jun 01 - Aug 31
+  val mostBusyAirports = AirStat.findMostBusyAirports(flights, airports, count = 5, months = Array(6, 7, 8))
+  mostBusyAirports.show
 
-  // query 3
-  val summerFlights = flights.filter(column("Month").between(6, 8))
-  summerFlights.cache()
-  val mostBusyAirports = summerFlights
-      .select("Origin")
-      .unionAll(summerFlights.select("Dest"))
-      .withColumnRenamed("Origin", "iata")
-      .groupBy("iata")
-      .count()
-      .orderBy(column("count").desc)
-      .limit(5)
-      .join(airports, "iata")
-      .select("airport", "count")
-      .orderBy(column("count").desc)
-  summerFlights.unpersist()
-
-  // query4
-  val mostBusyCarrier = flights
-      .groupBy("UniqueCarrier")
-      .count()
-      .withColumnRenamed("UniqueCarrier", "Code")
-      .orderBy(column("count").desc)
-      .limit(1)
-      .join(carriers, "Code")
-      .withColumnRenamed("Description", "carrier")
-      .select("carrier", "count")
+  // Find the carrier who served the biggest number of flights
+  val mostBusyCarrier = AirStat.findMostBusyCarriers(flights, carriers, count = 1)
+  mostBusyCarrier.show
 }
