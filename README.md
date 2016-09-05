@@ -9,7 +9,7 @@ scala-2 is a spark application that process aicraft log files (from http://stat-
 
 ## Testing environment
 
-Programm was tested on HDP 2.4 sandbox.
+Program was tested on HDP 2.4 sandbox.
 
 ## How to deploy
 
@@ -19,11 +19,11 @@ sbt clean assembly
 ```
 2. Copy scala-2-assembly-1.0.jar from target/scala-2.10/ to machine with Spark installed.
 3. Download dataset (http://stat-computing.org/dataexpo/2009/the-data.html year 2007 + dimensions http://stat-computing.org/dataexpo/2009/supplemental-data.html only Airports and Carrier Codes) and put it to hdfs.
-4. Run Spark job, defining claster manager and hdfs paths to dataset files:
+4. Run Spark job, defining cluster manager and hdfs paths to dataset files:
 ```
 spark-submit \
 --class aircraft.App \
---master <claster_manager> \
+--master <cluster_manager> \
 <path_to_jar>/scala-2-assembly-1.0.jar \
 --airports <hdfs_path_to_airports_dataset>/airports.csv \
 --carriers <hdfs_path_to_carriers_dataset>/carriers.csv \
@@ -51,7 +51,7 @@ scala-2-assembly-1.0.jar \
 --carriers /training/hive/carriers/carriers.csv \
 --flights /training/hive/flights/2007.csv.bz2
 ```
-**It is recomended to define --executor-memory and --driver-memory flags when running on YARN. Otherwise your job may wate forever for resources allocation**
+**It is recommended to define --executor-memory and --driver-memory flags when running on YARN. Otherwise your job may wait forever for resources allocation**
 
 ## Results
 
