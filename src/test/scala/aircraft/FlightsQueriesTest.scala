@@ -4,9 +4,6 @@ import com.holdenkarau.spark.testing.SharedSparkContext
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 import org.scalatest.FlatSpec
 
-/**
-  * Created by Alexander_Shoshin on 9/2/2016.
-  */
 class FlightsQueriesTest extends FlatSpec with SharedSparkContext {
   var flights: DataFrame = _
   var carriers: DataFrame = _
